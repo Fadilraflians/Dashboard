@@ -16,6 +16,54 @@ interface ChatMessage {
   widgetConfig?: WidgetConfig | null;
 }
 
+// ── AI robot avatar (inline SVG — no network dependency) ──────────────────────
+
+function RobotAvatar() {
+  return (
+    <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ display: "block" }}>
+      <defs>
+        <radialGradient id="aiBg" cx="50%" cy="40%" r="65%">
+          <stop offset="0%" stopColor="#818CF8" />
+          <stop offset="60%" stopColor="#6366F1" />
+          <stop offset="100%" stopColor="#4338CA" />
+        </radialGradient>
+        <linearGradient id="aiFace" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#E0E7FF" />
+          <stop offset="100%" stopColor="#C7D2FE" />
+        </linearGradient>
+        <radialGradient id="aiEye" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#67E8F9" />
+          <stop offset="60%" stopColor="#06B6D4" />
+          <stop offset="100%" stopColor="#0E7490" />
+        </radialGradient>
+      </defs>
+
+      {/* Background circle */}
+      <circle cx="50" cy="50" r="50" fill="url(#aiBg)" />
+
+      {/* Antenna */}
+      <line x1="50" y1="20" x2="50" y2="28" stroke="#C7D2FE" strokeWidth="3" strokeLinecap="round" />
+      <circle cx="50" cy="17" r="3.5" fill="#67E8F9" />
+
+      {/* Head */}
+      <rect x="26" y="30" width="48" height="40" rx="12" fill="url(#aiFace)" stroke="#A5B4FC" strokeWidth="1.5" />
+
+      {/* Eyes */}
+      <circle cx="40" cy="50" r="5" fill="url(#aiEye)" />
+      <circle cx="60" cy="50" r="5" fill="url(#aiEye)" />
+      <circle cx="40" cy="50" r="2" fill="#ECFEFF" />
+      <circle cx="60" cy="50" r="2" fill="#ECFEFF" />
+
+      {/* Mouth */}
+      <rect x="42" y="60" width="16" height="4" rx="2" fill="#6366F1" />
+
+      {/* Ears / side panels */}
+      <rect x="22" y="44" width="5" height="12" rx="2.5" fill="#A5B4FC" />
+      <rect x="73" y="44" width="5" height="12" rx="2.5" fill="#A5B4FC" />
+    </svg>
+  );
+}
+
 // ── Widget mini-preview badge shown in the chat bubble ────────────────────────
 
 function WidgetBadge({ widget }: { widget: WidgetConfig }) {
@@ -247,7 +295,7 @@ export default function Sidebar() {
           <div className="sidebarAiCard">
             <div className="sidebarAiCardLeft">
               <div className="sidebarAiAvatar">
-                <i className="pi pi-spark" />
+                <RobotAvatar />
               </div>
               <div className="sidebarAiInfo">
                 <span className="sidebarAiName">AiGovtech</span>
@@ -277,7 +325,7 @@ export default function Sidebar() {
             >
               <div className="sidebarChatAvatar">
                 {m.role === "assistant" ? (
-                  <i className="pi pi-spark" />
+                  <RobotAvatar />
                 ) : (
                   <i className="pi pi-user" />
                 )}
@@ -298,7 +346,7 @@ export default function Sidebar() {
           {typing && (
             <div className="sidebarChatMsg sidebarChatMsg-assistant">
               <div className="sidebarChatAvatar">
-                <i className="pi pi-spark" />
+                <RobotAvatar />
               </div>
               <div className="sidebarChatBubble">
                 <div className="sidebarChatText sidebarChatTyping">

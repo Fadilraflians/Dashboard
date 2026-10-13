@@ -95,6 +95,62 @@ function saveToStorage(widgets: WidgetConfig[]): void {
   }
 }
 
+// ── First-fit slot packing ────────────────────────────────────────────────────
+//
+// Instead of always stacking new widgets at the very bottom, scan existing
+// layouts and place the new widget at the first (topmost, then leftmost) free
+// rectangle where it fits without overlapping.
+
+interface Rect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+const CANVAS_W = 1120; // matches MFE dashboard default width
+const GAP = 16;
+
+function rectsOverlap(a: Rect, b: Rect): boolean {
+  return !(
+    a.x + a.w + GAP <= b.x ||
+    b.x + b.w + GAP <= a.x ||
+    a.y + a.h + GAP <= b.y ||
+    b.y + b.h + GAP <= a.y
+  );
+}
+
+function findFreeSlot(existing: Rect[], w: number, h: number): { x: number; y: number } {
+  // Candidate Y positions: top of canvas, plus the bottom edge (+gap) of every
+  // existing widget — these are the only rows where a new widget could start.
+  const ySet = new Set<number>([0]);
+  for (const e of existing) ySet.add(e.y + e.h + GAP);
+  const ys = Array.from(ySet).sort((a, b) => a - b);
+
+  for (const y of ys) {
+    // Candidate X positions at this row: left edge, plus the right edge (+gap)
+    // of every widget that vertically overlaps this row.
+    const xSet = new Set<number>([0]);
+    for (const e of existing) {
+      if (e.y < y + h && e.y + e.h > y) {
+        xSet.add(e.x + e.w + GAP);
+      }
+    }
+    const xs = Array.from(xSet).sort((a, b) => a - b);
+    for (const x of xs) {
+      if (x + w > CANVAS_W) continue;
+      const candidate: Rect = { x, y, w, h };
+      if (!existing.some((e) => rectsOverlap(candidate, e))) {
+        return { x, y };
+      }
+    }
+  }
+
+  // No free slot found — place below everything.
+  const maxY = existing.reduce((m, e) => Math.max(m, e.y + e.h + GAP), 0);
+  return { x: 0, y: maxY };
+}
+
 // ── Context ──────────────────────────────────────────────────────────────────
 
 const WidgetContext = createContext<WidgetContextValue | null>(null);
@@ -117,18 +173,18 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
   const addWidget = useCallback((widget: WidgetConfig) => {
     setActiveWidgets((prev) => {
       const exists = prev.some((w) => w.id === widget.id);
-      // Auto-assign layout if not provided: stack below existing widgets
       const size = DEFAULT_SIZE[widget.componentName] ?? { w: 480, h: 300 };
+      // If no layout provided, find the first free slot (topmost → leftmost)
+      // instead of always stacking at the very bottom.
       const withLayout: WidgetConfig = widget.layout
         ? widget
-        : {
-            ...widget,
-            layout: {
-              x: 0,
-              y: prev.length * 320,
-              ...size,
-            },
-          };
+        : (() => {
+            const existing = prev
+              .filter((w) => w.layout)
+              .map((w) => ({ ...w.layout! }));
+            const { x, y } = findFreeSlot(existing, size.w, size.h);
+            return { ...widget, layout: { x, y, w: size.w, h: size.h } };
+          })();
       const next = exists
         ? prev.map((w) => (w.id === widget.id ? withLayout : w))
         : [...prev, withLayout];

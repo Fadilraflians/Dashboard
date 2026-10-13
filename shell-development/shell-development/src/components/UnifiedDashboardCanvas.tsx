@@ -46,7 +46,44 @@ const MFE_DEFAULTS: CanvasItem[] = [
   { id: "mfe-main", kind: "mfe", visible: true, layout: { x: 0, y: 0, w: 1120, h: 620 } },
 ];
 
-function aiDefault(widget: WidgetConfig, index: number): CanvasItem {
+// ── First-fit slot packing (mirrors WidgetContext.findFreeSlot) ───────────────
+
+interface Rect { x: number; y: number; w: number; h: number; }
+
+const CANVAS_W = 1120;
+const GAP = 16;
+
+function rectsOverlap(a: Rect, b: Rect): boolean {
+  return !(
+    a.x + a.w + GAP <= b.x ||
+    b.x + b.w + GAP <= a.x ||
+    a.y + a.h + GAP <= b.y ||
+    b.y + b.h + GAP <= a.y
+  );
+}
+
+function findFreeSlot(existing: Rect[], w: number, h: number): { x: number; y: number } {
+  const ySet = new Set<number>([0]);
+  for (const e of existing) ySet.add(e.y + e.h + GAP);
+  const ys = Array.from(ySet).sort((a, b) => a - b);
+
+  for (const y of ys) {
+    const xSet = new Set<number>([0]);
+    for (const e of existing) {
+      if (e.y < y + h && e.y + e.h > y) xSet.add(e.x + e.w + GAP);
+    }
+    const xs = Array.from(xSet).sort((a, b) => a - b);
+    for (const x of xs) {
+      if (x + w > CANVAS_W) continue;
+      const candidate: Rect = { x, y, w, h };
+      if (!existing.some((e) => rectsOverlap(candidate, e))) return { x, y };
+    }
+  }
+  const maxY = existing.reduce((m, e) => Math.max(m, e.y + e.h + GAP), 0);
+  return { x: 0, y: maxY };
+}
+
+function aiDefault(widget: WidgetConfig, existing: Rect[]): CanvasItem {
   const sizeMap: Partial<Record<ComponentName, { w: number; h: number }>> = {
     MetricCardWidget:    { w: 280, h: 130 },
     BarChartWidget:      { w: 520, h: 320 },
@@ -58,13 +95,10 @@ function aiDefault(widget: WidgetConfig, index: number): CanvasItem {
     TableWidget:         { w: 700, h: 360 },
   };
   const { w, h } = sizeMap[widget.componentName] ?? { w: 480, h: 300 };
-  // Place AI widgets starting below the MFE area
-  const cols = 2;
-  const col  = index % cols;
-  const row  = Math.floor(index / cols);
+  const { x, y } = findFreeSlot(existing, w, h);
   return {
     id: widget.id, kind: "ai", visible: true,
-    layout: { x: col * (w + 16), y: 640 + row * (h + 16), w, h },
+    layout: { x, y, w, h },
   };
 }
 
@@ -431,9 +465,13 @@ export default function UnifiedDashboardCanvas({ remote, sharedUrl }: Props) {
 
   // Ensure every AI widget has a layout
   useEffect(() => {
-    activeWidgets.forEach((w, i) => {
+    activeWidgets.forEach((w) => {
       if (!w.layout) {
-        updateLayout(w.id, aiDefault(w, i).layout);
+        const existing: Rect[] = [
+          ...mfeItems.filter((i) => i.visible).map((i) => i.layout),
+          ...activeWidgets.filter((o) => o.id !== w.id && o.layout).map((o) => o.layout!),
+        ];
+        updateLayout(w.id, aiDefault(w, existing).layout);
       }
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
