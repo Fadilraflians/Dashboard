@@ -1,0 +1,29 @@
+.homeButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid var(--border, #e5e7eb);
+  background: var(--surface, #ffffff);
+  color: var(--brand, #4f46e5);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.homeButton:hover {
+  background: var(--surface-alt, #f5f6ff);
+  border-color: var(--brand, #4f46e5);
+}
+
+.homeButton i {
+  font-size: 0.95rem;
+}
+
+@media (max-width: 640px) {
+  .homeButton span {
+    display: none;
+  }
+}

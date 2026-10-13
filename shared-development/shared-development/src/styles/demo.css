@@ -1,0 +1,42 @@
+body {
+  margin: 0;
+  font-family: var(--font-inter);
+  background: var(--app-bg);
+  color: var(--text-body);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.demoWrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
+.demoTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-strong);
+  margin: 0 0 0.25rem;
+}
+
+.demoSub {
+  color: var(--text-faint);
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem;
+}
+
+.demoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.demoToggle {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--brand);
+  font-weight: 600;
+  cursor: pointer;
+}

@@ -1,0 +1,55 @@
+/* ============================================================
+ * Centralized design tokens (shared UI remote).
+ * Light values in :root, dark overrides under [data-theme="dark"].
+ * Import once in a consumer; variables land on :root/<html> and apply
+ * to the whole document (shell + all mounted MFEs share one <html>).
+ * ============================================================ */
+
+:root {
+  --font-inter: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Brand */
+  --brand: #4f46e5;
+  --brand-shadow: #3c34c2;
+  --accent: #14b8a6;
+
+  /* Surfaces */
+  --app-bg: #f7f7f9;
+  --surface: #ffffff;
+  --surface-alt: #f5f6ff;
+  --surface-muted: #eef0ff;
+  --border: #e5e7eb;
+  --border-soft: #f0f0f0;
+
+  /* Text */
+  --text-strong: #181d27;
+  --text-body: #181d27;
+  --text-muted: #374151;
+  --text-faint: #6b7280;
+  --text-dim: #9ca3af;
+
+  /* Status */
+  --success: #17b26a;
+  --danger: #f04438;
+}
+
+[data-theme="dark"] {
+  --brand: #8b90f5;
+  --accent: #2dd4bf;
+
+  --app-bg: #0d1117;
+  --surface: #161b22;
+  --surface-alt: #1c2430;
+  --surface-muted: #1f2a44;
+  --border: #2a3340;
+  --border-soft: #232b36;
+
+  --text-strong: #e8edf4;
+  --text-body: #d4dbe4;
+  --text-muted: #aab4c0;
+  --text-faint: #8b96a4;
+  --text-dim: #6b7684;
+
+  --success: #34d399;
+  --danger: #f87171;
+}

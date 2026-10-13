@@ -1,0 +1,66 @@
+.container {
+  padding: 1.5rem;
+}
+
+.contextBanner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #eef0ff;
+  border: 1px solid #c7cdff;
+  color: #2e299b;
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.82rem;
+  margin-bottom: 1.25rem;
+}
+
+.pageHeader {
+  margin-bottom: 1.5rem;
+}
+
+.pageTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #181d27;
+  margin: 0 0 0.25rem;
+}
+
+.pageSubtitle {
+  color: #717680;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.panel {
+  background: #fff;
+  border: 1px solid #dfe2e6;
+  border-radius: 14px;
+  padding: 1.25rem;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+/* ===== Dark mode overrides ===== */
+:global([data-theme="dark"]) .contextBanner {
+  background: #1f2a44;
+  border-color: #2a3340;
+  color: #a5b4fc;
+}
+
+:global([data-theme="dark"]) .pageTitle {
+  color: #e8edf4;
+}
+
+:global([data-theme="dark"]) .pageSubtitle {
+  color: #aab4c0;
+}
+
+:global([data-theme="dark"]) .panel {
+  background: #161b22;
+  border-color: #2a3340;
+}

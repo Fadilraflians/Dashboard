@@ -1,0 +1,529 @@
+.container {
+  padding: 1.5rem;
+}
+
+.contextBanner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #eef0ff;
+  border: 1px solid #c7cdff;
+  color: #2e299b;
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.82rem;
+  margin-bottom: 1.25rem;
+}
+
+.pageHeader {
+  margin-bottom: 1.5rem;
+}
+
+.pageTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #181d27;
+  margin: 0 0 0.25rem;
+}
+
+.pageSubtitle {
+  color: #717680;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.cardsLoading {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-faint, #717680);
+  font-size: 0.9rem;
+  padding: 1rem;
+}
+
+/* Per-remote-card loading (inside RemoteCardBoundary Suspense fallback) */
+.cardLoading {
+  background: #fff;
+  border: 1px solid #dfe2e6;
+  border-radius: 14px;
+  padding: 1.25rem;
+  min-height: 118px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  font-size: 1.3rem;
+}
+
+/* Per-remote-card error (shared remote down) — only this card fails */
+.cardError {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 14px;
+  padding: 1.25rem;
+  min-height: 118px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #b91c1c;
+}
+
+.cardError > i {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.cardErrorTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #7f1d1d;
+  margin: 0 0 0.15rem;
+}
+
+.cardErrorMsg {
+  font-size: 0.78rem;
+  color: #b91c1c;
+  margin: 0;
+}
+
+/* Shimmer for local card loading */
+.skeleton {
+  display: block;
+  height: 1.6rem;
+  width: 60%;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    #eef0ff 25%,
+    #e5e7eb 37%,
+    #eef0ff 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+.statCard {
+  background: #fff;
+  border: 1px solid #dfe2e6;
+  border-radius: 14px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.statTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.statIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.statLabel {
+  color: #717680;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.statValue {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #181d27;
+  margin: 0;
+}
+
+.statDelta {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.deltaUp {
+  color: #17b26a;
+}
+
+.deltaDown {
+  color: #f04438;
+}
+
+.panels {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1rem;
+}
+
+.panel {
+  background: #fff;
+  border: 1px solid #dfe2e6;
+  border-radius: 14px;
+  padding: 1.25rem;
+}
+
+.panelTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #181d27;
+  margin: 0 0 1rem;
+}
+
+.chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  height: 200px;
+}
+
+.bar {
+  flex: 1;
+  background: linear-gradient(180deg, #6d7bf7 0%, #4f46e5 100%);
+  border-radius: 8px 8px 0 0;
+  min-height: 6px;
+  transition: height 0.4s ease;
+}
+
+.barLabel {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #717680;
+  margin-top: 0.35rem;
+}
+
+.barCol {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  flex: 1;
+}
+
+@media (max-width: 1100px) {
+  .statGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .panels {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .statGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== Dark mode overrides ===== */
+:global([data-theme="dark"]) .contextBanner {
+  background: #1f2a44;
+  border-color: #2a3340;
+  color: #a5b4fc;
+}
+
+:global([data-theme="dark"]) .pageTitle,
+:global([data-theme="dark"]) .statValue,
+:global([data-theme="dark"]) .panelTitle {
+  color: #e8edf4;
+}
+
+:global([data-theme="dark"]) .pageSubtitle,
+:global([data-theme="dark"]) .statLabel,
+:global([data-theme="dark"]) .barLabel {
+  color: #aab4c0;
+}
+
+:global([data-theme="dark"]) .statCard,
+:global([data-theme="dark"]) .panel {
+  background: #161b22;
+  border-color: #2a3340;
+}
+
+:global([data-theme="dark"]) .cardLoading {
+  background: #161b22;
+  border-color: #2a3340;
+  color: #6b7684;
+}
+
+:global([data-theme="dark"]) .skeleton {
+  background: linear-gradient(90deg, #1c2430 25%, #2a3340 37%, #1c2430 63%);
+  background-size: 400% 100%;
+}
+
+/* ═══════════════════════════════════════════════════
+   Free-form draggable canvas
+   ═══════════════════════════════════════════════════ */
+
+.freeCanvas {
+  position: relative;
+  width: 100%;
+  min-height: 480px;
+  background-color: #f8fafc;
+  background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1px);
+  background-size: 20px 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1rem;
+  overflow: visible;
+}
+
+/* ── Global: hide page scrollbar until hover/scroll ── */
+:global(html),
+:global(body) {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+:global(html:hover),
+:global(body:hover) {
+  scrollbar-color: rgba(99, 102, 241, 0.5) transparent;
+}
+
+:global(html)::-webkit-scrollbar,
+:global(body)::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+:global(html)::-webkit-scrollbar-track,
+:global(body)::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+:global(html)::-webkit-scrollbar-thumb,
+:global(body)::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+:global(html:hover)::-webkit-scrollbar-thumb,
+:global(body:hover)::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.5);
+}
+
+:global(html)::-webkit-scrollbar-thumb:hover,
+:global(body)::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.8);
+}
+
+/* ── Draggable box ── */
+.draggableBox {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  overflow: hidden;
+  user-select: none;
+  transition: box-shadow 0.18s ease;
+  box-sizing: border-box;
+}
+
+/* ── Title / drag bar ── */
+.dragHandle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px 7px 12px;
+  background: linear-gradient(135deg, rgba(99,102,241,0.05), rgba(139,92,246,0.03));
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  cursor: grab;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.dragHandle:active { cursor: grabbing; }
+
+.dragHandleLeft {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.dragDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6366f1;
+  flex-shrink: 0;
+}
+
+.dragTitle {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-left: 6px;
+}
+
+/* ── Close (×) button — hidden by default, shown on parent hover ── */
+.closeBtn {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  cursor: pointer;
+  /* Hidden until parent is hovered */
+  opacity: 0;
+  transition: opacity 0.18s ease, background 0.15s, transform 0.12s;
+  line-height: 1;
+}
+
+/* Show close button when the draggable box is hovered */
+.draggableBox:hover .closeBtn {
+  opacity: 1;
+}
+
+.closeBtn:hover {
+  background: rgba(239, 68, 68, 0.22);
+  transform: scale(1.1);
+}
+
+/* ── Content area ── */
+.draggableContent {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+  padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.draggableContent:hover {
+  scrollbar-color: rgba(99, 102, 241, 0.5) transparent;
+}
+
+.draggableContent::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.draggableContent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.draggableContent::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.draggableContent:hover::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.5);
+}
+
+.draggableContent::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.8);
+}
+
+/* Remove inner padding/border from LocalStatCard when inside a DraggablePanel */
+.statCardInner .statCard {
+  border: none;
+  border-radius: 0;
+  padding: 0.75rem 1rem;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Resize handle (bottom-right corner) ── */
+.resizeHandle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 22px;
+  height: 22px;
+  cursor: nwse-resize;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 3px 3px;
+  z-index: 5;
+}
+
+/* ── Restore button ── */
+.restoreBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid #6366f1;
+  border-radius: 20px;
+  background: #fff;
+  color: #6366f1;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.restoreBtn:hover {
+  background: #6366f1;
+  color: #fff;
+}
+
+/* ── Dark mode ── */
+:global([data-theme="dark"]) .draggableBox {
+  background: #161b22;
+  border-color: #2a3340;
+}
+
+:global([data-theme="dark"]) .dragHandle {
+  background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.06));
+  border-bottom-color: #2a3340;
+}
+
+:global([data-theme="dark"]) .dragTitle {
+  color: #d4dbe4;
+}
+
+:global([data-theme="dark"]) .freeCanvas {
+  background-image: radial-gradient(circle, #2a3340 1px, transparent 1px);
+  border-color: rgba(99,102,241,0.2);
+}
+
+:global([data-theme="dark"]) .restoreBtn {
+  background: #161b22;
+  border-color: #8b90f5;
+  color: #8b90f5;
+}
+
+:global([data-theme="dark"]) .restoreBtn:hover {
+  background: #6366f1;
+  color: #fff;
+}

@@ -1,0 +1,162 @@
+stages:
+  - code-review
+  - build
+  - deploy
+  - scan-image
+
+build_dev:
+  stage: build
+  needs: []
+  tags:
+    - dev-192.168.223.58-GOVTECHDEV
+  before_script:
+    - |
+      set -x
+      echo "Loading .npmrc template..."
+      curl --header \
+        "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+        "https://gitlab-dc.bni.co.id/api/v4/projects/9385/repository/files/npm%2F.npmrc/raw?ref=master" \
+        -o .npmrc
+    - |
+      set -x
+      echo "Loading Dockerfile template..."
+      curl --header \
+        "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+        "https://gitlab-dc.bni.co.id/api/v4/projects/6234/repository/files/Template-JavaScript-24-ubi10-Nexus-NGINX%2FDockerfile/raw?ref=master" \
+        -o Dockerfile
+    - |
+      set +x
+      echo "Loading deployment config vault..."
+      DEPLOYMENT_CONFIG_DEV=$(curl -s \
+        --header "X-Vault-Token: ${VAULT_TOKEN}" \
+        --request GET \
+        "${VAULT_URL}${VAULT_DEPLOYMENT_CONFIG_ENDPOINT_DEV}")
+
+      echo "Define image variable..."
+      export IMAGE_NAME=$(echo "$DEPLOYMENT_CONFIG_DEV" | jq -r '.data.data."image.repository"' | tr -d '\n')
+      export IMAGE_TAG=$(echo "$DEPLOYMENT_CONFIG_DEV" | jq -r '.data.data."image.tag"' | tr -d '\n')
+    - echo "${CI_PROJECT_DIR}"
+    - ls -a
+  script:
+    - |
+      set -x
+      printf "%s" "${HARBOR_PASSWORD}" | podman login "${HARBOR_URL_DEV}" -u "${HARBOR_USER}" --password-stdin
+      podman build --secret id=npmrc,src=.npmrc -t "${IMAGE_NAME}:${IMAGE_TAG}" --no-cache .
+      podman push "${IMAGE_NAME}:${IMAGE_TAG}"
+      podman rmi -f "${IMAGE_NAME}:${IMAGE_TAG}" || true
+      podman system prune -a --volumes -f || true
+  after_script:
+    - rm -rf ${CI_PROJECT_DIR}/*
+    - rm -rf ${TMPDIR}/*
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "development" && $CI_PIPELINE_SOURCE == "push"'
+
+deploy_dev:
+  stage: deploy
+  needs:
+    - build_dev
+  tags:
+    - dev-192.168.223.58-GOVTECHDEV
+  before_script:
+    - |
+      set -x
+      cd "${HELM_WORKSPACE_DIR}"
+      if [ -d "${HELM_REPO_NAME}/.git" ]; then
+        echo "Repository ${HELM_REPO_NAME} already exists"
+      
+        cd "${HELM_REPO_NAME}"
+      
+        if git branch --list | grep -q "${HELM_REPO_BRANCH}"; then
+            echo "branch ${HELM_REPO_BRANCH} found"
+      
+            git checkout -- .
+            git checkout "${HELM_REPO_BRANCH}"
+            git pull origin "${HELM_REPO_BRANCH}"
+        else
+            echo "branch ${HELM_REPO_BRANCH} not found locally"
+      
+            git fetch origin "${HELM_REPO_BRANCH}:${HELM_REPO_BRANCH}"
+            git checkout "${HELM_REPO_BRANCH}"
+        fi
+      else
+        echo "Repository ${HELM_REPO_NAME} does not exist. Cloning..."
+
+        git clone \
+            --single-branch \
+            -b "${HELM_REPO_BRANCH}" \
+            "https://${GITLAB_USERNAME}:${GITLAB_TOKEN}@${HELM_REPO_URL}"
+      fi
+    - |
+      set +x
+      echo "Loading deployment config vault..."
+      DEPLOYMENT_CONFIG_DEV=$(curl -s \
+        --header "X-Vault-Token: ${VAULT_TOKEN}" \
+        --request GET \
+        "${VAULT_URL}${VAULT_DEPLOYMENT_CONFIG_ENDPOINT_DEV}")
+
+      echo "Define app variable..."
+      export OCP_APP_NAME=$(echo "$DEPLOYMENT_CONFIG_DEV" | jq -r '.data.data."app.name"' | tr -d '\n')
+
+      echo "Loading configmaps vault..."
+      CONFIGMAPS_DEV=$(curl -s \
+        --header "X-Vault-Token: ${VAULT_TOKEN}" \
+        --request GET \
+        "${VAULT_URL}${VAULT_CONFIGMAPS_ENDPOINT_DEV}")
+
+      echo "Loading secrets vault..."
+      SECRETS_DEV=$(curl -s \
+        --header "X-Vault-Token: ${VAULT_TOKEN}" \
+        --request GET \
+        "${VAULT_URL}${VAULT_SECRETS_ENDPOINT_DEV}")
+    
+      ARGS=""
+
+      echo "Build deployment config arguments..." 
+      while read -r entry; do
+        key=$(echo "$entry" | jq -r '.key')
+        value=$(echo "$entry" | jq -r '.value')
+
+        ARGS="$ARGS --set ${key}=${value}"
+      done < <(
+        echo "$DEPLOYMENT_CONFIG_DEV" | jq -c '.data.data | to_entries[]'
+      )
+
+      echo "Build configmaps arguments..." 
+      while read -r entry; do
+        key=$(echo "$entry" | jq -r '.key')
+        value=$(echo "$entry" | jq -r '.value')
+
+        value="${value//,/\\,}"
+        ARGS="$ARGS --set-string configmaps.data.${key}=${value}"
+      done < <(
+        echo "$CONFIGMAPS_DEV" | jq -c '.data.data | to_entries[]'
+      )
+
+      echo "Build secrets arguments..."
+      while read -r entry; do
+        key=$(echo "$entry" | jq -r '.key')
+        value=$(echo "$entry" | jq -r '.value')
+
+        value="${value//,/\\,}"
+        ARGS="$ARGS --set-string secrets.data.${key}=${value}"
+      done < <(
+        echo "$SECRETS_DEV" | jq -c '.data.data | to_entries[]'
+      )
+
+      echo "Define HELM arguments..."
+      export HELM_ARGS="$ARGS"
+    - echo "${CI_PROJECT_DIR}"
+    - ls -a
+  script:
+  - |
+    set -x
+    set +H
+    oc login "${OCP_SERVER_URL_DEV}" -u "${OCP_USERNAME_DEV}" -p "${OCP_PASSWORD_DEV}" --insecure-skip-tls-verify=true
+    oc project "${OCP_NAMESPACE_DEV}"
+    set +x
+    helm upgrade --install "${OCP_APP_NAME}" "${HELM_WORKSPACE_DIR}/${HELM_REPO_NAME}" -n "${OCP_NAMESPACE_DEV}" --reset-values ${HELM_ARGS} --wait --timeout "${OCP_DEPLOY_TIMEOUT}"
+  after_script:
+    - rm -rf ${CI_PROJECT_DIR}/*
+    - rm -rf ${TMPDIR}/*
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "development" && $CI_PIPELINE_SOURCE == "push"'

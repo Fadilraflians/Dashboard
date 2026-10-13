@@ -1,0 +1,78 @@
+.card {
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #dfe2e6);
+  border-radius: 14px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.1rem;
+  /* Fixed identity for this card: brand (indigo). */
+  background: var(--brand, #4f46e5);
+}
+
+.delta {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.up {
+  color: var(--success, #17b26a);
+}
+
+.down {
+  color: var(--danger, #f04438);
+}
+
+.label {
+  color: var(--text-faint, #717680);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-strong, #181d27);
+  margin: 0;
+}
+
+.skeleton {
+  display: block;
+  height: 1.6rem;
+  width: 70%;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--surface-alt, #eef0ff) 25%,
+    var(--border, #e5e7eb) 37%,
+    var(--surface-alt, #eef0ff) 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}

@@ -1,0 +1,12 @@
+.appBody {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.appMain {
+  flex: 1;
+  min-width: 0;
+  padding: 1.5rem;
+  overflow: auto;
+}
